@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generative AI in Media & Entertainment | Research Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── Design tokens ─────────────────────────────────── */
+:root {
+  --void:    #0A0A0F;
+  --deep:    #12121A;
+  --surface: #1A1A28;
+  --lift:    #242436;
+  --border:  rgba(255,255,255,0.07);
+  --text:    #E8E8F0;
+  --muted:   #7A7A9A;
+  --dim:     #4A4A6A;
+  --gold:    #C8A96E;
+  --gold2:   #E8C98E;
+  --spark:   #7B68EE;   /* signature accent — medium slate */
+  --spark2:  #9D8FFF;
+  --red:     #E05050;
+  --green:   #50C878;
+}
+
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+
+body {
+  font-family:'Space Grotesk', sans-serif;
+  background:var(--void);
+  color:var(--text);
+  font-size:17px;
+  line-height:1.75;
+  overflow-x:hidden;
+}
+
+/* ── Signature element: film-grain texture overlay ── */
+body::after {
+  content:'';
+  position:fixed; inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none; z-index:9999;
+  opacity:.4;
+}
+
+.container { max-width:1160px; margin:0 auto; padding:0 40px; }
+
+/* ── NAV ─────────────────────────────────────────── */
+nav {
+  position:fixed; top:0; left:0; right:0; z-index:100;
+  padding:18px 40px;
+  display:flex; align-items:center; justify-content:space-between;
+  background:rgba(10,10,15,0.85);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  transition:all .3s;
+}
+.nav-logo {
+  font-family:'JetBrains Mono', monospace;
+  font-size:13px; color:var(--gold);
+  letter-spacing:.08em;
+}
+.nav-links { display:flex; gap:32px; list-style:none; }
+.nav-links a {
+  font-size:13px; color:var(--muted); text-decoration:none;
+  letter-spacing:.06em; text-transform:uppercase;
+  transition:color .2s;
+}
+.nav-links a:hover { color:var(--text); }
+
+/* ── HERO ─────────────────────────────────────────── */
+.hero {
+  min-height:100vh;
+  display:flex; flex-direction:column; justify-content:flex-end;
+  padding:140px 40px 80px;
+  position:relative; overflow:hidden;
+  border-bottom:1px solid var(--border);
+}
+
+/* animated gradient backdrop — the film-reel aesthetic */
+.hero-bg {
+  position:absolute; inset:0; z-index:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 70% 30%, rgba(123,104,238,.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 20% 80%, rgba(200,169,110,.06) 0%, transparent 50%),
+    var(--void);
+}
+
+/* film strip decoration — top */
+.film-strip {
+  position:absolute; top:0; left:0; right:0; height:48px;
+  display:flex; z-index:1;
+  border-bottom:1px solid var(--border);
+  overflow:hidden;
+}
+.film-cell {
+  flex-shrink:0;
+  width:36px; height:100%;
+  border-right:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+}
+.film-cell span {
+  display:block; width:18px; height:24px;
+  background:var(--surface);
+  border-radius:2px;
+}
+
+.hero-content { position:relative; z-index:2; max-width:900px; }
+
+.hero-eyebrow {
+  font-family:'JetBrains Mono', monospace;
+  font-size:12px; color:var(--gold);
+  letter-spacing:.2em; text-transform:uppercase;
+  margin-bottom:28px;
+  display:flex; align-items:center; gap:12px;
+}
+.hero-eyebrow::before {
+  content:''; display:block;
+  width:32px; height:1px; background:var(--gold);
+}
+
+.hero h1 {
+  font-family:'DM Serif Display', serif;
+  font-size:clamp(44px, 7vw, 92px);
+  line-height:1.0;
+  letter-spacing:-.02em;
+  color:var(--text);
+  margin-bottom:12px;
+}
+.hero h1 em {
+  font-style:italic; color:var(--spark2);
+  position:relative;
+}
+
+.hero-subtitle {
+  font-size:20px; color:var(--muted);
+  max-width:680px; line-height:1.6;
+  font-weight:300; margin-bottom:56px;
+}
+
+/* stat bar */
+.hero-stats {
+  display:grid; grid-template-columns:repeat(4,1fr);
+  gap:1px; background:var(--border);
+  border:1px solid var(--border);
+  border-radius:2px; overflow:hidden;
+}
+.stat {
+  background:var(--deep);
+  padding:24px 28px;
+  transition:background .3s;
+}
+.stat:hover { background:var(--surface); }
+.stat-num {
+  font-family:'DM Serif Display', serif;
+  font-size:38px; line-height:1;
+  color:var(--text); margin-bottom:8px;
+}
+.stat-num .unit {
+  font-family:'Space Grotesk', sans-serif;
+  font-size:18px; font-weight:400; color:var(--gold);
+}
+.stat-label { font-size:13px; color:var(--muted); line-height:1.4; }
+
+/* ── SECTION CHROME ───────────────────────────────── */
+section { padding:100px 0; }
+
+.section-eyebrow {
+  font-family:'JetBrains Mono', monospace;
+  font-size:11px; color:var(--spark);
+  letter-spacing:.2em; text-transform:uppercase;
+  margin-bottom:20px;
+  display:flex; align-items:center; gap:10px;
+}
+.section-eyebrow::before {
+  content:''; display:block;
+  width:24px; height:1px; background:var(--spark);
+}
+
+.section-title {
+  font-family:'DM Serif Display', serif;
+  font-size:clamp(32px, 4.5vw, 56px);
+  line-height:1.1; letter-spacing:-.02em;
+  color:var(--text); margin-bottom:24px;
+}
+
+.section-intro {
+  font-size:19px; color:var(--muted);
+  max-width:760px; line-height:1.8;
+  font-weight:300; margin-bottom:64px;
+}
+
+.rule { height:1px; background:var(--border); margin-bottom:64px; }
+
+/* ── INTRO / CONTEXT ──────────────────────────────── */
+#intro { border-bottom:1px solid var(--border); }
+
+.intro-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:64px; align-items:start;
+}
+
+.body-text {
+  font-size:17px; color:var(--text);
+  line-height:1.85; margin-bottom:20px;
+}
+
+.pull-quote {
+  background:var(--surface);
+  border-left:3px solid var(--spark);
+  padding:32px 36px; border-radius:0 4px 4px 0;
+  margin:0;
+}
+.pull-quote p {
+  font-family:'DM Serif Display', serif;
+  font-size:22px; line-height:1.5;
+  color:var(--text); font-style:italic;
+  margin-bottom:16px;
+}
+.pull-quote cite {
+  font-family:'JetBrains Mono', monospace;
+  font-size:12px; color:var(--muted);
+  font-style:normal; letter-spacing:.05em;
+}
+
+/* ── COMPARISON TABLE ─────────────────────────────── */
+#compare { background:var(--deep); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+
+.compare-table {
+  width:100%; border-collapse:collapse;
+  font-size:15px;
+}
+.compare-table th {
+  background:var(--surface);
+  padding:18px 24px;
+  text-align:left;
+  font-family:'JetBrains Mono', monospace;
+  font-size:12px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--gold); font-weight:500;
+  border-bottom:1px solid var(--border);
+}
+.compare-table th:first-child { color:var(--muted); }
+.compare-table td {
+  padding:18px 24px;
+  border-bottom:1px solid var(--border);
+  color:var(--text); vertical-align:top;
+  line-height:1.6;
+}
+.compare-table tr:last-child td { border-bottom:none; }
+.compare-table tr:hover td { background:var(--surface); }
+.compare-table td:first-child {
+  font-family:'JetBrains Mono', monospace;
+  font-size:13px; color:var(--muted);
+  white-space:nowrap;
+}
+.tag {
+  display:inline-block;
+  padding:3px 10px; border-radius:2px;
+  font-family:'JetBrains Mono', monospace;
+  font-size:11px; letter-spacing:.08em;
+  font-weight:500;
+}
+.tag-pred { background:rgba(80,200,120,.12); color:var(--green); }
+.tag-gen  { background:rgba(123,104,238,.15); color:var(--spark2); }
+
+/* ── MODELS ───────────────────────────────────────── */
+#models { border-bottom:1px solid var(--border); }
+
+.models-grid {
+  display:grid; grid-template-columns:repeat(2,1fr);
+  gap:2px; background:var(--border);
+  border:1px solid var(--border); border-radius:4px;
+  overflow:hidden;
+}
+
+.model-card {
+  background:var(--deep);
+  padding:44px 40px;
+  position:relative; overflow:hidden;
+  transition:background .4s;
+  cursor:default;
+}
+.model-card:hover { background:var(--surface); }
+
+.model-card::after {
+  content:''; position:absolute;
+  bottom:0; left:0; right:0; height:3px;
+  background:var(--spark);
+  transform:scaleX(0); transform-origin:left;
+  transition:transform .4s cubic-bezier(.4,0,.2,1);
+}
+.model-card:hover::after { transform:scaleX(1); }
+
+.model-num {
+  font-family:'JetBrains Mono', monospace;
+  font-size:11px; color:var(--dim);
+  letter-spacing:.2em; text-transform:uppercase;
+  margin-bottom:20px;
+}
+.model-name {
+  font-family:'DM Serif Display', serif;
+  font-size:32px; color:var(--text);
+  line-height:1.1; margin-bottom:8px;
+}
+.model-sub {
+  font-size:13px; color:var(--muted);
+  margin-bottom:24px;
+}
+.model-badge {
+  display:inline-block; margin-bottom:20px;
+}
+.model-desc {
+  font-size:15px; color:var(--muted);
+  line-height:1.75; margin-bottom:24px;
+}
+.model-app {
+  padding-top:20px;
+  border-top:1px solid var(--border);
+  font-size:14px; color:var(--text);
+  line-height:1.6;
+}
+.model-app strong { color:var(--gold); font-weight:500; }
+
+/* ── CASE STUDIES ─────────────────────────────────── */
+#cases { background:var(--deep); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+
+.cases-list { display:flex; flex-direction:column; gap:2px; }
+
+.case {
+  background:var(--void);
+  border:1px solid var(--border);
+  border-radius:4px; overflow:hidden;
+}
+
+.case-header {
+  display:grid; grid-template-columns:1fr auto;
+  align-items:center;
+  padding:32px 40px;
+  cursor:pointer;
+  transition:background .3s;
+  gap:24px;
+}
+.case-header:hover { background:var(--surface); }
+
+.case-company {
+  font-family:'DM Serif Display', serif;
+  font-size:28px; color:var(--text);
+  margin-bottom:4px;
+}
+.case-tagline { font-size:14px; color:var(--muted); }
+
+.case-toggle {
+  width:36px; height:36px; border-radius:50%;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--muted); font-size:20px; line-height:1;
+  cursor:pointer; display:flex;
+  align-items:center; justify-content:center;
+  transition:all .3s; flex-shrink:0;
+}
+.case.open .case-toggle { background:var(--spark); color:#fff; border-color:var(--spark); transform:rotate(45deg); }
+
+.case-body {
+  display:none;
+  padding:0 40px 40px;
+}
+.case.open .case-body { display:grid; grid-template-columns:repeat(2,1fr); gap:32px; }
+
+.case-row { display:flex; flex-direction:column; gap:6px; }
+.case-row-label {
+  font-family:'JetBrains Mono', monospace;
+  font-size:11px; color:var(--spark);
+  letter-spacing:.15em; text-transform:uppercase;
+}
+.case-row-val { font-size:15px; color:var(--text); line-height:1.7; }
+.case-row-val strong { color:var(--gold); font-weight:500; }
+.case-row.full { grid-column:1/-1; }
+
+/* special: drake incident */
+.case.incident .case-company { color:var(--red); }
+.case.incident .case-toggle { border-color:rgba(224,80,80,.3); }
+.case.incident.open .case-toggle { background:var(--red); border-color:var(--red); }
+
+/* ── CHALLENGES ───────────────────────────────────── */
+#challenges { border-bottom:1px solid var(--border); }
+
+.challenges-grid {
+  display:grid; grid-template-columns:repeat(3,1fr);
+  gap:2px; background:var(--border); border-radius:4px; overflow:hidden;
+}
+.challenge {
+  background:var(--deep);
+  padding:40px 36px;
+  position:relative;
+  transition:background .3s;
+}
+.challenge:hover { background:var(--surface); }
+.challenge::before {
+  content:''; position:absolute;
+  top:0; left:0; right:0; height:3px;
+  background:var(--red);
+}
+.ch-num {
+  font-family:'JetBrains Mono', monospace;
+  font-size:11px; color:var(--dim);
+  letter-spacing:.2em; margin-bottom:20px;
+}
+.ch-title {
+  font-family:'DM Serif Display', serif;
+  font-size:24px; color:var(--text);
+  margin-bottom:16px; line-height:1.2;
+}
+.ch-body { font-size:15px; color:var(--muted); line-height:1.75; }
+.ch-body strong { color:var(--text); font-weight:500; }
+
+/* ── TIMELINE ─────────────────────────────────────── */
+#timeline { background:var(--deep); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+
+.tl-filter {
+  display:flex; gap:8px; margin-bottom:60px;
+}
+.tl-btn {
+  background:transparent; border:1px solid var(--border);
+  color:var(--muted); padding:8px 20px;
+  font-family:'JetBrains Mono', monospace;
+  font-size:12px; letter-spacing:.1em;
+  cursor:pointer; border-radius:2px;
+  transition:all .25s;
+}
+.tl-btn:hover { border-color:var(--spark); color:var(--text); }
+.tl-btn.active { background:var(--spark); color:#fff; border-color:var(--spark); }
+
+.tl-wrap { position:relative; }
+.tl-line {
+  position:absolute; top:0; bottom:0; left:calc(50% - 1px);
+  width:1px; background:var(--border); z-index:0;
+}
+
+.tl-item {
+  display:grid; grid-template-columns:1fr 80px 1fr;
+  gap:32px; margin-bottom:48px; align-items:center;
+  opacity:0; transform:translateY(16px);
+  animation:fadeUp .5s forwards;
+}
+.tl-item:nth-child(1){animation-delay:.05s}
+.tl-item:nth-child(2){animation-delay:.1s}
+.tl-item:nth-child(3){animation-delay:.15s}
+.tl-item:nth-child(4){animation-delay:.2s}
+.tl-item:nth-child(5){animation-delay:.25s}
+.tl-item:nth-child(6){animation-delay:.3s}
+.tl-item:nth-child(7){animation-delay:.35s}
+.tl-item:nth-child(8){animation-delay:.4s}
+
+@keyframes fadeUp { to { opacity:1; transform:none; } }
+
+.tl-year {
+  grid-column:2; z-index:1;
+  width:80px; height:80px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'DM Serif Display', serif;
+  font-size:20px; font-weight:700;
+  background:var(--surface); color:var(--text);
+  border:1px solid var(--border);
+}
+.tl-year.gen { background:var(--spark); color:#fff; border-color:var(--spark); }
+.tl-year.future { background:transparent; color:var(--red); border:1px dashed var(--red); }
+
+.tl-card {
+  background:var(--void); border:1px solid var(--border);
+  padding:24px 28px; border-radius:4px;
+  position:relative;
+}
+.tl-card::after {
+  content:''; position:absolute;
+  top:50%; width:20px; height:1px; background:var(--border);
+}
+.tl-item.right .tl-card { grid-column:1; }
+.tl-item.right .tl-card::after { right:-20px; }
+.tl-item.left .tl-card { grid-column:3; }
+.tl-item.left .tl-card::after { left:-20px; }
+
+.tl-flag {
+  display:inline-block; padding:3px 10px; margin-bottom:10px;
+  font-family:'JetBrains Mono', monospace; font-size:11px;
+  letter-spacing:.1em; text-transform:uppercase;
+  border-radius:2px;
+}
+.tl-flag.model { background:rgba(123,104,238,.15); color:var(--spark2); }
+.tl-flag.milestone { background:rgba(200,169,110,.12); color:var(--gold); }
+.tl-flag.future-tag { background:rgba(224,80,80,.12); color:var(--red); }
+
+.tl-card h4 {
+  font-family:'DM Serif Display', serif;
+  font-size:20px; color:var(--text);
+  margin-bottom:8px; line-height:1.2;
+}
+.tl-card p { font-size:14px; color:var(--muted); line-height:1.6; }
+
+/* ── FUTURE ───────────────────────────────────────── */
+#future {
+  position:relative; overflow:hidden;
+  border-bottom:1px solid var(--border);
+}
+.future-bg-text {
+  position:absolute; top:50%; left:-40px;
+  transform:translateY(-50%);
+  font-family:'DM Serif Display', serif;
+  font-size:400px; font-weight:700; line-height:1;
+  color:rgba(255,255,255,.015);
+  pointer-events:none; user-select:none;
+  white-space:nowrap;
+}
+
+.future-grid {
+  display:grid; grid-template-columns:repeat(3,1fr);
+  gap:40px; position:relative; z-index:1;
+}
+.future-item { border-top:2px solid var(--spark); padding-top:28px; }
+.future-item h4 {
+  font-family:'DM Serif Display', serif;
+  font-size:26px; color:var(--text);
+  margin-bottom:16px; line-height:1.2;
+}
+.future-item p { font-size:15px; color:var(--muted); line-height:1.75; }
+.future-item p strong { color:var(--text); font-weight:500; }
+
+/* ── CONCLUSION ───────────────────────────────────── */
+#conclusion {
+  background:var(--deep);
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+}
+
+.conclusion-body {
+  max-width:800px;
+  font-size:19px; line-height:1.9;
+  color:var(--text); font-weight:300;
+}
+.conclusion-body p { margin-bottom:28px; }
+.conclusion-body strong { color:var(--gold); font-weight:500; }
+.conclusion-body em { color:var(--spark2); font-style:italic; }
+
+/* ── FOOTER ───────────────────────────────────────── */
+footer {
+  background:var(--void);
+  padding:64px 40px 40px;
+  border-top:1px solid var(--border);
+}
+.footer-inner {
+  max-width:1160px; margin:0 auto;
+  display:grid; grid-template-columns:2fr 1fr 1fr;
+  gap:48px; margin-bottom:48px;
+}
+.footer-about h5,
+.footer-col h5 {
+  font-family:'JetBrains Mono', monospace;
+  font-size:12px; letter-spacing:.15em; text-transform:uppercase;
+  color:var(--gold); margin-bottom:16px;
+}
+.footer-about p { font-size:14px; color:var(--muted); line-height:1.7; }
+.footer-col ul { list-style:none; }
+.footer-col li { font-size:14px; color:var(--muted); margin-bottom:8px; }
+.footer-col a { color:var(--muted); text-decoration:none; transition:color .2s; }
+.footer-col a:hover { color:var(--spark2); }
+
+.footer-bottom {
+  max-width:1160px; margin:0 auto;
+  padding-top:24px; border-top:1px solid var(--border);
+  display:flex; justify-content:space-between; flex-wrap:wrap; gap:16px;
+  font-family:'JetBrains Mono', monospace;
+  font-size:12px; color:var(--dim);
+}
+
+/* ── RESPONSIVE ───────────────────────────────────── */
+@media (max-width:900px) {
+  .hero-stats { grid-template-columns:repeat(2,1fr); }
+  .intro-grid, .models-grid,
+  .challenges-grid, .future-grid { grid-template-columns:1fr; }
+  .compare-table { display:block; overflow-x:auto; }
+  .tl-line { left:32px; }
+  .tl-item { grid-template-columns:64px 1fr; }
+  .tl-year { grid-column:1; width:64px; height:64px; font-size:16px; }
+  .tl-item.right .tl-card,
+  .tl-item.left  .tl-card { grid-column:2; }
+  .tl-item.right .tl-card::after,
+  .tl-item.left  .tl-card::after { right:auto; left:-20px; }
+  .case.open .case-body { grid-template-columns:1fr; }
+  .footer-inner { grid-template-columns:1fr; }
+  nav { padding:16px 20px; }
+  .nav-links { display:none; }
+  .container { padding:0 20px; }
+  section { padding:64px 0; }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  *, *::before, *::after {
+    animation-duration:.01ms !important;
+    transition-duration:.01ms !important;
+  }
+}
+
+.sr-only {
+  position:absolute; width:1px; height:1px;
+  overflow:hidden; clip:rect(0,0,0,0);
+}
+</style>
+</head>
+<body>
+
+<!-- ── NAV ─────────────────────────────────────────── -->
+<nav>
+  <div class="nav-logo">AI × Media &amp; Entertainment</div>
+  <ul class="nav-links">
+    <li><a href="#intro">Context</a></li>
+    <li><a href="#compare">AI Types</a></li>
+    <li><a href="#models">Models</a></li>
+    <li><a href="#cases">Case Studies</a></li>
+    <li><a href="#challenges">Challenges</a></li>
+    <li><a href="#timeline">Timeline</a></li>
+    <li><a href="#future">Future</a></li>
+  </ul>
+</nav>
+
+<!-- ── HERO ─────────────────────────────────────────── -->
+<header class="hero">
+  <div class="hero-bg"></div>
+
+  <!-- film strip cells -->
+  <div class="film-strip" aria-hidden="true">
+    <script>
+      document.currentScript.insertAdjacentHTML('beforebegin',
+        Array.from({length:40},()=>'<div class="film-cell"><span></span></div>').join('')
+      );
+    </script>
+  </div>
+
+  <div class="hero-content container" style="padding-left:40px;padding-right:40px;">
+    <div class="hero-eyebrow">Advanced Deep Learning · Research Report</div>
+    <h1>
+      Generative AI<br>
+      in <em>Media &amp;</em><br>
+      <em>Entertainment</em>
+    </h1>
+    <p class="hero-subtitle">
+      How diffusion models, transformers, and neural audio synthesis
+      are rewriting the economics of creative content production — and
+      what none of the press releases will tell you.
+    </p>
+
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num">$2.4<span class="unit">T</span></div>
+        <div class="stat-label">Global industry market value (PwC, 2024)</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">3B<span class="unit">+</span></div>
+        <div class="stat-label">Assets generated by Adobe Firefly in year one</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">900<span class="unit">%</span></div>
+        <div class="stat-label">Rise in deepfake media, 2022–2024 (MIT &amp; Stanford)</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">$1<span class="unit">B</span></div>
+        <div class="stat-label">ElevenLabs valuation — 24 months after founding</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ── INTRO ─────────────────────────────────────────── -->
+<section id="intro">
+  <div class="container">
+    <div class="section-eyebrow">01 — Context</div>
+    <h2 class="section-title">An industry that reinvents itself —<br>then panics, then adapts</h2>
+    <p class="section-intro">
+      In 2023, Hollywood saw its largest strike in decades. The grievance
+      wasn't wages — it was a question no contract had ever addressed:
+      <em>Can AI write the script I would have written?</em> That fear wasn't irrational.
+      But it also wasn't the complete story.
+    </p>
+    <div class="rule"></div>
+    <div class="intro-grid">
+      <div>
+        <p class="body-text">
+          Media and entertainment — cinema, streaming, music, podcasting, digital advertising,
+          video games — generates over $2.4 trillion annually and employs tens of millions.
+          What makes its encounter with generative AI different from logistics or manufacturing
+          is that AI doesn't just optimize the <em>process</em> here. It enters the <em>product</em> itself.
+          The film, the song, the advertisement: these are what gets produced.
+          And AI is beginning to produce them.
+        </p>
+        <p class="body-text">
+          Three factors make this industry uniquely fertile for generative AI:
+          an abundance of labeled creative data (films, recordings, images);
+          the demand for mass personalization at scale;
+          and the relentless cost pressure that makes $0.01-per-image generation
+          impossible to ignore when traditional production costs thousands.
+        </p>
+        <p class="body-text">
+          The research question driving this report: <strong>how is the industry deploying generative AI
+          in visual and audio content production today — and what does it actually mean
+          for the future of human creativity?</strong>
+        </p>
+      </div>
+      <div>
+        <blockquote class="pull-quote">
+          <p>
+            "Generative AI doesn't replace creativity. It replaces specific
+            production skills. The person whose value came from rendering a
+            character or recording a voice-over finds that skill less scarce.
+            The person who knows <em>what is worth making, why, and for whom</em>
+            — that value is untouched."
+          </p>
+          <cite>— Personal reflection, from the report conclusion</cite>
+        </blockquote>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── COMPARE ─────────────────────────────────────── -->
+<section id="compare">
+  <div class="container">
+    <div class="section-eyebrow">02 — AI Types</div>
+    <h2 class="section-title">Predictive vs. Generative:<br>The distinction that matters</h2>
+    <p class="section-intro">
+      "AI" gets used as if it's one uniform technology. In media, the difference
+      between these two modes is not one of degree — it is a difference in kind.
+      Predictive AI is the critic who evaluates a film; Generative AI is the director who makes one.
+    </p>
+    <div class="rule"></div>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Dimension</th>
+          <th><span class="tag tag-pred">Predictive AI</span></th>
+          <th><span class="tag tag-gen">Generative AI</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Core question</td>
+          <td>What will happen next?</td>
+          <td>What can we create that didn't exist before?</td>
+        </tr>
+        <tr>
+          <td>Output type</td>
+          <td>A decision or numeric forecast</td>
+          <td>Original content: video, audio, image, text</td>
+        </tr>
+        <tr>
+          <td>Examples in media</td>
+          <td>Netflix recommendation engine · YouTube Content ID · Sentiment analysis</td>
+          <td>Sora · ElevenLabs · Adobe Firefly · Runway Gen-3 · Suno</td>
+        </tr>
+        <tr>
+          <td>Primary models</td>
+          <td>Collaborative Filtering · BERT · XGBoost · LSTM</td>
+          <td>Diffusion Models · Transformer · WaveNet · GAN</td>
+        </tr>
+        <tr>
+          <td>Impact on jobs</td>
+          <td>Augments existing roles</td>
+          <td>May fully replace certain production roles</td>
+        </tr>
+        <tr>
+          <td>Commercial maturity</td>
+          <td>Mature — decades of deployment</td>
+          <td>Emerging — most tools under 3 years old</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ── MODELS ─────────────────────────────────────── -->
+<section id="models">
+  <div class="container">
+    <div class="section-eyebrow">03 — Deep Learning Models</div>
+    <h2 class="section-title">The four architectures<br>running the creative machine</h2>
+    <p class="section-intro">
+      Each model below is discussed not just as a mechanism, but for why it is
+      specifically suited to media applications — which is what separates
+      a research report from a textbook summary.
+    </p>
+    <div class="rule"></div>
+    <div class="models-grid">
+
+      <div class="model-card">
+        <div class="model-num">Model · 01</div>
+        <h3 class="model-name">Diffusion Models</h3>
+        <div class="model-sub">The architecture that dethroned GANs</div>
+        <span class="tag tag-gen model-badge">Generative</span>
+        <p class="model-desc">
+          Rather than building an image from scratch, the network learns to remove noise.
+          Take a real image, add Gaussian noise across 100 steps until it's pure static.
+          Train the network to reverse that process. At inference time, start from random
+          noise and progressively denoise it — guided by a text prompt — until a
+          coherent output emerges. The quality advantage over GANs comes from this
+          iterative self-correction: 100 steps of refinement versus one forward pass.
+        </p>
+        <div class="model-app">
+          <strong>In media:</strong> OpenAI's Sora uses a Diffusion Transformer (DiT) — a fusion
+          of diffusion denoising with transformer attention — enabling temporal consistency
+          across video frames. Adobe Firefly uses Latent Diffusion Models trained exclusively
+          on licensed Adobe Stock content.
+        </div>
+      </div>
+
+      <div class="model-card">
+        <div class="model-num">Model · 02</div>
+        <h3 class="model-name">Transformers</h3>
+        <div class="model-sub">The architecture running everything else</div>
+        <span class="tag tag-gen model-badge">Generative</span>
+        <p class="model-desc">
+          Vaswani et al.'s 2017 "Attention Is All You Need" is arguably the most
+          consequential AI paper of the modern era. Self-Attention lets a model relate
+          every element in a sequence to every other element simultaneously — replacing
+          slow sequential RNNs with a parallelizable architecture that scales with compute.
+          In media, transformers operate as text encoders (translating prompts into
+          mathematical representations) and as direct generative models.
+        </p>
+        <div class="model-app">
+          <strong>In media:</strong> Spotify's DJ feature generates personalized spoken commentary
+          between songs using a Transformer that models listening preferences. Runway and Pika
+          use Transformer-based text encoders for Text-to-Video conditioning.
+        </div>
+      </div>
+
+      <div class="model-card">
+        <div class="model-num">Model · 03</div>
+        <h3 class="model-name">WaveNet</h3>
+        <div class="model-sub">Neural audio synthesis</div>
+        <span class="tag tag-gen model-badge">Generative</span>
+        <p class="model-desc">
+          DeepMind's 2016 architecture was the first empirical proof that human speech could
+          be synthesized at a quality nearly indistinguishable from real recordings.
+          It generates audio waveforms sample-by-sample — 16,000 samples per second —
+          using Dilated Causal Convolutions that capture long-range temporal dependencies
+          without prohibitive compute cost. Voice cloning builds on this by adding a
+          Voice Embedding Layer that captures individual vocal identity: pitch, prosodic
+          rhythm, formant structure.
+        </p>
+        <div class="model-app">
+          <strong>In media:</strong> ElevenLabs' Voice Cloning replicates any person's voice
+          from a 30-second sample. Spotify has integrated voice synthesis into audiobook
+          narration at scale — over 10,000 titles produced.
+        </div>
+      </div>
+
+      <div class="model-card">
+        <div class="model-num">Model · 04</div>
+        <h3 class="model-name">GANs</h3>
+        <div class="model-sub">The artist and the critic in one system</div>
+        <span class="tag tag-gen model-badge">Generative</span>
+        <p class="model-desc">
+          Generative Adversarial Networks pit two networks against each other: a Generator
+          producing synthetic content, a Discriminator trying to detect it. Their adversarial
+          dynamic improves quality over training — but because the Generator produces output
+          in a single forward pass, generation is dramatically faster than Diffusion's
+          iterative process. This speed advantage keeps GANs relevant in specific media
+          contexts where real-time or near-real-time generation matters.
+        </p>
+        <div class="model-app">
+          <strong>In media:</strong> D-ID and HeyGen use GANs for Talking Heads synthesis —
+          animating a still photograph with lip-synced speech — enabling thousands of
+          marketing videos to be produced daily without cameras, crews, or shoot days.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── CASE STUDIES ─────────────────────────────────── -->
+<section id="cases">
+  <div class="container">
+    <div class="section-eyebrow">04 — Case Studies</div>
+    <h2 class="section-title">When theory meets<br>the market</h2>
+    <p class="section-intro">
+      Four cases, each representing a different integration model:
+      a legacy giant embedding AI into existing professional workflows,
+      two startups whose entire business model is built on generation,
+      and one controversial incident that reveals what polished press releases omit.
+    </p>
+    <div class="rule"></div>
+
+    <div class="cases-list">
+
+      <!-- Adobe -->
+      <div class="case" id="case-adobe">
+        <div class="case-header" onclick="toggleCase('case-adobe')">
+          <div>
+            <div class="case-company">Adobe Firefly</div>
+            <div class="case-tagline">The company that has owned creative professionals' tools for 40 years</div>
+          </div>
+          <button class="case-toggle" aria-label="Expand">+</button>
+        </div>
+        <div class="case-body">
+          <div class="case-row">
+            <span class="case-row-label">Application</span>
+            <span class="case-row-val">
+              Launched March 2023, integrated directly into Photoshop, Premiere Pro, After Effects,
+              and Illustrator. Enables text-to-image generation, Generative Fill (extending images
+              beyond original bounds), and intelligent object removal with contextually appropriate
+              replacement. What distinguishes Firefly is not raw model performance — it's deep
+              integration into existing professional workflows.
+            </span>
+          </div>
+          <div class="case-row">
+            <span class="case-row-label">Model / Architecture</span>
+            <span class="case-row-val">
+              <strong>Latent Diffusion Models</strong> trained exclusively on Adobe Stock and
+              public-domain content, with a CLIP-based Text Encoder for text-to-image conditioning.
+              Adobe committed publicly that Firefly will not train on user content without explicit
+              permission — a structural ethical commitment, not a policy retrofit.
+            </span>
+          </div>
+          <div class="case-row">
+            <span class="case-row-label">Verified Results</span>
+            <span class="case-row-val">
+              <strong>3 billion+</strong> assets generated via Firefly in year one.
+              Adobe reports <strong>40–60% productivity gains</strong> for professional users
+              using Generative Fill. Adobe's stock price rose ~30% in months following launch.
+            </span>
+          </div>
+          <div class="case-row">
+            <span class="case-row-label">Source</span>
+            <span class="case-row-val">Adobe Blog (March 2023) · MIT Technology Review (2024) · Bloomberg</span>
+          </div>
+          <div class="case-row full">
+            <span class="case-row-label">Critical note</span>
+            <span class="case-row-val">
+              Adobe is the only major player to build an explicit ethical position into
+              the product architecture itself — licensed training data only. In an industry
+              racing on benchmark performance, that choice reveals something important:
+              <strong>values are a design decision, not a constraint on innovation.</strong>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ElevenLabs -->
+      <div class="case" id="case-eleven">
+        <div class="case-header" onclick="toggleCase('case-eleven')">
+          <div>
+            <div class="case-company">ElevenLabs</div>
+            <div class="case-tagline">US-Polish startup, founded 2022 — from zero to unicorn in 24 months</div>
+          </div>
+          <button class="case-toggle" aria-label="Expand">+</button>
+        </div>
+        <div class="case-body">
+          <div class="case-row">
+            <span class="case-row-label">Application</span>
+            <span class="case-row-val">
+              Voice synthesis and voice cloning at professional quality. Converts text to
+              realistic human-sounding voice; clones any voice from a 30-second sample;
+              translates video content into other languages while preserving the original
+              speaker's vocal character and syncing lip movement. Primary use cases:
+              audiobooks, podcasts, educational content, game dialogue, corporate training.
+            </span>
+          </div>
+          <div class="case-row">
+            <span class="case-row-label">Model / Architecture</span>
+            <span class="case-row-val">
+              <strong>Neural TTS</strong> built on a WaveNet-inspired architecture, with a
+              Multilingual Transformer Encoder for text understanding and a
+              <strong>Voice Embedding Layer</strong> capturing individual vocal identity:
+              not just pitch and frequency, but prosodic rhythm, emotional range, and
+              phonetic idiosyncrasies. Technical differentiator: Emotional Transfer —
+              conveying the expressive texture of a voice, not just its sound.
+            </span>
+          </div>
+          <div class="case-row">
+            <span class="case-row-label">Verified Results</span>
+            <span class="case-row-val">
+              <strong>Unicorn valuation ($1B+)</strong> in January 2024 — under 2 years from founding.
+              <strong>10,000+ audiobooks</strong> produced via the platform on Spotify alone.
+              Early partnership discussions with Warner Bros for multi-language dubbing
+              using original actor voice profiles.
+            </span>
+          </div>
+          <div class="case-row">
+            <span class="case-row-label">Source</span>
+            <span class="case-row-val">Forbes (January 2024) · TechCrunch · Spotify Newsroom</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Runway -->
+      <div class="case" id="case-runway">
+        <div class="case-header" onclick="toggleCase('case-runway')">
+          <div>
+            <div class="case-company">Runway ML</div>
+            <div class="case-tagline">Founded 2018, New York — built the tools, then watched Hollywood arrive</div>
+          </div>
+          <button class="case-toggle" aria-label="Expand">+</button>
+        </div>
+        <div class="case-body">
+          <div class="case-row">
+            <span class="case-row-label">Application</span>
+            <span class="case-row-val">
+              Gen-3 Alpha (2024) produces videos up to 10 seconds at cinematic quality.
+              What distinguishes Runway from simpler text-to-video tools is directorial
+              granularity: camera motion specification (pan, tilt, dolly, zoom), lighting
+              conditions, color grading style, and reference-image conditioning.
+              This is what a working director needs, not just a curious consumer.
+            </span>
+          </div>
+          <div class="case-row">
+            <span class="case-row-label">Model / Architecture</span>
+            <span class="case-row-val">
+              <strong>Video Diffusion Models</strong> with Temporal Attention mechanisms for
+              frame-to-frame consistency — the technically hardest problem in video generation.
+              Multi-Modal Conditioning accepts text, reference images, and existing video clips
+              simultaneously. <strong>Temporal Consistency</strong> (keeping characters and physics
+              plausible across frames) remains the unsolved frontier in this space.
+            </span>
+          </div>
+          <div class="case-row">
+            <span class="case-row-label">Verified Results</span>
+            <span class="case-row-val">
+              <strong>BAFTA Award (2023)</strong> for contribution to <em>Everything Everywhere All at Once</em>.
+              Raised <strong>$237M+</strong> in funding through 2024 at a valuation exceeding $1.5B.
+              Used by major Hollywood studios and over 1 million independent creators.
+            </span>
+          </div>
+          <div class="case-row">
+            <span class="case-row-label">Source</span>
+            <span class="case-row-val">TechCrunch · Wired · BAFTA Press Release (2023) · Runway Official Blog</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Drake incident -->
+      <div class="case incident" id="case-drake">
+        <div class="case-header" onclick="toggleCase('case-drake')">
+          <div>
+            <div class="case-company">The Fake Drake Incident</div>
+            <div class="case-tagline">April 2023 — A case study in structural tensions, not edge cases</div>
+          </div>
+          <button class="case-toggle" aria-label="Expand">+</button>
+        </div>
+        <div class="case-body">
+          <div class="case-row">
+            <span class="case-row-label">What happened</span>
+            <span class="case-row-val">
+              "Heart on My Sleeve" circulated on TikTok and Spotify credited to Drake and
+              The Weeknd. Neither artist had recorded a single second of it. One creator
+              used ElevenLabs to clone both voices and Suno to generate the underlying music.
+              The track reached millions of streams before Universal Music Group demanded
+              platform-wide removal.
+            </span>
+          </div>
+          <div class="case-row">
+            <span class="case-row-label">Why this matters</span>
+            <span class="case-row-val">
+              This is not a misuse of the application — it is a <strong>tension built into the
+              architecture itself.</strong> The same technology that enables professional audiobook
+              narration is structurally identical to the technology that enables full identity
+              impersonation of a public figure. The capability and the risk are inseparable.
+            </span>
+          </div>
+          <div class="case-row">
+            <span class="case-row-label">On "technical controls"</span>
+            <span class="case-row-val">
+              ElevenLabs added watermarking and detection APIs post-incident. A 2024 MIT study
+              found these controls <strong>do not constitute a meaningful barrier</strong> to a
+              determined actor. The solution, if one exists, will be legal and social
+              before it is technological.
+            </span>
+          </div>
+          <div class="case-row">
+            <span class="case-row-label">Source</span>
+            <span class="case-row-val">Rolling Stone (April 2023) · The Verge · Musically</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── CHALLENGES ─────────────────────────────────── -->
+<section id="challenges">
+  <div class="container">
+    <div class="section-eyebrow">05 — Challenges &amp; Risks</div>
+    <h2 class="section-title">What the press releases<br>don't say</h2>
+    <p class="section-intro">
+      Every company communicates about its AI in polished, optimistic language.
+      This section reads between the lines — asking the structural questions
+      that enthusiasm tends to paper over.
+    </p>
+    <div class="rule"></div>
+    <div class="challenges-grid">
+      <div class="challenge">
+        <div class="ch-num">Technical · 01</div>
+        <h4 class="ch-title">Long-form coherence</h4>
+        <p class="ch-body">
+          Current models excel at short clips — 5 to 60 seconds. Ask for a coherent
+          short film and characters change appearance between scenes, objects disappear,
+          and visual continuity breaks down. <strong>This is the actual reason OpenAI delayed
+          Sora's commercial release for over a year</strong> after its announcement — not
+          the stated reasons.
+        </p>
+      </div>
+      <div class="challenge">
+        <div class="ch-num">Technical · 02</div>
+        <h4 class="ch-title">Physics and anatomy errors</h4>
+        <p class="ch-body">
+          Fingers are still generated with incorrect counts. Water behaves implausibly.
+          Complex kinetic motion looks animated rather than filmed. These aren't minor
+          aesthetic flaws — they mean generated content still requires <strong>human editorial
+          review before publication</strong>, which reintroduces the time and cost the tools
+          were supposed to eliminate.
+        </p>
+      </div>
+      <div class="challenge">
+        <div class="ch-num">Technical · 03</div>
+        <h4 class="ch-title">Compute cost concentration</h4>
+        <p class="ch-body">
+          Generating one minute of Sora-quality video consumes compute equivalent to hours
+          of standard LLM inference. Professional-grade generative video will remain
+          concentrated among organizations that can afford the infrastructure —
+          <strong>recreating the power asymmetry the technology was supposed to dismantle.</strong>
+        </p>
+      </div>
+      <div class="challenge">
+        <div class="ch-num">Ethical · 04</div>
+        <h4 class="ch-title">IP and training data</h4>
+        <p class="ch-body">
+          Every major generative model was trained on copyrighted works without explicit
+          permission from rights holders. Stability AI, Midjourney, and OpenAI face
+          active litigation from artists and record labels. The courts are still defining
+          what "fair use" means here — and <strong>that definition will shape the entire
+          technology's legal landscape.</strong>
+        </p>
+      </div>
+      <div class="challenge">
+        <div class="ch-num">Ethical · 05</div>
+        <h4 class="ch-title">Synthetic media and identity</h4>
+        <p class="ch-body">
+          A <strong>900% rise in deepfake media</strong> between 2022 and 2024 (MIT &amp; Stanford, 2024).
+          The Drake incident isn't an edge case — it's a preview. The same tools
+          accessible to legitimate creators are accessible to bad actors.
+          This is structural, not a deployment failure.
+        </p>
+      </div>
+      <div class="challenge">
+        <div class="ch-num">Regulatory · 06</div>
+        <h4 class="ch-title">Law chasing technology</h4>
+        <p class="ch-body">
+          The <strong>EU AI Act (2024)</strong> requires disclosure of AI-generated content.
+          The US Copyright Office ruled fully AI-generated content is not registrable.
+          In the Arab Gulf region, the regulatory space is still blank — an opportunity
+          to design thoughtful frameworks, and a risk if that opportunity is missed.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── TIMELINE ─────────────────────────────────────── -->
+<section id="timeline">
+  <div class="container">
+    <div class="section-eyebrow">06 — Timeline</div>
+    <h2 class="section-title">How we got here:<br>2017 to 2031</h2>
+    <p class="section-intro">
+      The generative AI revolution in media didn't happen overnight.
+      Filter the timeline to track the model milestones or the industry adoption curve separately.
+    </p>
+    <div class="rule"></div>
+
+    <div class="tl-filter" role="tablist">
+      <button class="tl-btn active" data-filter="all">All</button>
+      <button class="tl-btn" data-filter="model">Model Milestones</button>
+      <button class="tl-btn" data-filter="industry">Industry Adoption</button>
+    </div>
+
+    <div class="tl-wrap">
+      <div class="tl-line" aria-hidden="true"></div>
+
+      <div class="tl-item right" data-track="model">
+        <div class="tl-card">
+          <span class="tl-flag model">Model Milestone</span>
+          <h4>GAN — Goodfellow et al.</h4>
+          <p>The foundational paper introducing adversarial training. The architecture that would power face-swap and talking-head applications a decade later.</p>
+        </div>
+        <div class="tl-year">2014</div>
+      </div>
+
+      <div class="tl-item left" data-track="model">
+        <div class="tl-year">2016</div>
+        <div class="tl-card">
+          <span class="tl-flag model">Model Milestone</span>
+          <h4>WaveNet — DeepMind</h4>
+          <p>First empirical proof that human speech could be synthesized near-indistinguishably from real recordings. The architecture ElevenLabs would build on six years later.</p>
+        </div>
+      </div>
+
+      <div class="tl-item right" data-track="model">
+        <div class="tl-card">
+          <span class="tl-flag model">Model Milestone</span>
+          <h4>"Attention Is All You Need"</h4>
+          <p>Vaswani et al. introduces the Transformer architecture. Arguably the most consequential AI paper of the modern era — the backbone of every major generative model today.</p>
+        </div>
+        <div class="tl-year">2017</div>
+      </div>
+
+      <div class="tl-item left" data-track="model">
+        <div class="tl-year gen">2021</div>
+        <div class="tl-card">
+          <span class="tl-flag model">Model Milestone</span>
+          <h4>Diffusion Models — DDPM &amp; DALL·E</h4>
+          <p>Ho et al.'s DDPM paper and OpenAI's DALL·E establish diffusion as the dominant image generation paradigm. The era of "text to anything" begins.</p>
+        </div>
+      </div>
+
+      <div class="tl-item right" data-track="industry">
+        <div class="tl-card">
+          <span class="tl-flag milestone">Industry</span>
+          <h4>Stable Diffusion goes open-source</h4>
+          <p>Stability AI releases weights publicly. For the first time, professional-grade image generation is accessible to anyone with a consumer GPU. The democratization inflection point.</p>
+        </div>
+        <div class="tl-year gen">2022</div>
+      </div>
+
+      <div class="tl-item left" data-track="industry">
+        <div class="tl-year">2023</div>
+        <div class="tl-card">
+          <span class="tl-flag milestone">Industry</span>
+          <h4>Hollywood Strike + Adobe Firefly</h4>
+          <p>The WGA and SAG-AFTRA strikes put AI in media contracts for the first time. Simultaneously, Adobe Firefly launches — showing a path where AI augments rather than bypasses creative professionals.</p>
+        </div>
+      </div>
+
+      <div class="tl-item right" data-track="model">
+        <div class="tl-card">
+          <span class="tl-flag model">Model Milestone</span>
+          <h4>Sora — OpenAI</h4>
+          <p>Text-to-video generation at cinematic quality. The Diffusion Transformer architecture. Hollywood's reaction: equal parts fascination and dread. Commercial release delayed — long-form coherence unsolved.</p>
+        </div>
+        <div class="tl-year gen">2024</div>
+      </div>
+
+      <div class="tl-item left" data-track="industry">
+        <div class="tl-year">2024</div>
+        <div class="tl-card">
+          <span class="tl-flag milestone">Industry</span>
+          <h4>EU AI Act + ElevenLabs Unicorn</h4>
+          <p>First comprehensive AI regulation requiring disclosure of synthetic media. Same year, ElevenLabs reaches $1B valuation in 24 months — the fastest-growing voice synthesis company ever.</p>
+        </div>
+      </div>
+
+      <div class="tl-item right" data-track="industry">
+        <div class="tl-card" style="border:1px dashed rgba(224,80,80,.3);">
+          <span class="tl-flag future-tag">Projected</span>
+          <h4>15–20% of music AI-generated</h4>
+          <p>IFPI projects that AI-generated music will account for 15–20% of all produced content by 2030. The question won't be whether AI makes music — it will be what "authorship" legally means.</p>
+        </div>
+        <div class="tl-year future">2030</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── FUTURE ─────────────────────────────────────── -->
+<section id="future">
+  <div class="future-bg-text" aria-hidden="true">2031</div>
+  <div class="container">
+    <div class="section-eyebrow">07 — Future Outlook</div>
+    <h2 class="section-title">Forecasts built on evidence,<br>not optimism</h2>
+    <p class="section-intro">
+      The media industry runs on narratives. The AI industry runs on hype.
+      What follows attempts to separate the two — distinguishing what we can
+      say with confidence from what remains genuinely open.
+    </p>
+    <div class="rule"></div>
+    <div class="future-grid">
+      <div class="future-item">
+        <h4>Production costs collapse</h4>
+        <p>
+          Goldman Sachs (2023) projects <strong>60–80% reduction</strong> in standard marketing video
+          production costs within five years. This isn't only a threat to large studios —
+          it's an opening for independent creators who previously couldn't access
+          broadcast-quality tools.
+        </p>
+      </div>
+      <div class="future-item">
+        <h4>New roles that don't yet exist</h4>
+        <p>
+          WEF Future of Jobs Report (2025) identifies emerging positions: <strong>Creative Prompt
+          Engineer, AI Output Editor, Hyper-Personalized Experience Designer.</strong>
+          These roles require different skills than those they partially replace —
+          a genuine transition challenge that workforce development hasn't caught up to.
+        </p>
+      </div>
+      <div class="future-item">
+        <h4>The IP question will define the decade</h4>
+        <p>
+          Three scenarios in play: licensing models where AI companies pay rights holders
+          for training data; restricting training to public-domain content; or continued
+          litigation. <strong>Which scenario wins will fundamentally shape what these tools
+          are and who can use them.</strong>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CONCLUSION ─────────────────────────────────── -->
+<section id="conclusion">
+  <div class="container">
+    <div class="section-eyebrow">08 — Conclusion</div>
+    <h2 class="section-title">What I learned,<br>not just what I found</h2>
+    <div class="rule"></div>
+    <div class="conclusion-body">
+      <p>
+        I begin this conclusion with a personal admission: when I started this research,
+        my guiding question was "Will AI replace creative professionals?" By the time I
+        finished, I realized that question is wrongly framed from the start.
+      </p>
+      <p>
+        <strong>Generative AI doesn't replace creativity. It replaces specific production skills.</strong>
+        The person whose value came from rendering a character, recording a voice-over, or
+        editing a video clip finds that skill less scarce today. The person whose value comes
+        from knowing what is worth making, why, for whom, and when — that value is untouched
+        by any generative model currently deployed.
+      </p>
+      <p>
+        The finding that surprised me most wasn't OpenAI's Sora or ElevenLabs' voice cloning.
+        It was <strong>Adobe</strong>. Not because their technology is superior, but because they are the only
+        major player that built an explicit ethical position into the architecture of the product —
+        licensed training data, no user content ingestion without permission. In an industry
+        racing on benchmarks, that choice reveals something important:
+        <em>values are a design decision, not a constraint on innovation.</em>
+      </p>
+      <p>
+        And for us — as computer science and AI students in this region — the conclusion is
+        concrete: the technology is here, the infrastructure is accessible, but <strong>what is
+        missing are models that speak our languages with our nuances, tools that understand
+        our storytelling traditions.</strong> That gap is both a research challenge and a market one.
+        It is the project worth working on.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────────── -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-about">
+      <h5>About this page</h5>
+      <p>
+        A research report for the Advanced Deep Learning course, exploring generative AI
+        in the media and entertainment industry. Research angle: visual and audio content
+        creation. All statistics and company references are sourced from peer-reviewed
+        papers, industry reports, and verified journalism.
+      </p>
+    </div>
+    <div class="footer-col">
+      <h5>Key Papers</h5>
+      <ul>
+        <li>Ho et al. — DDPM (NeurIPS 2020)</li>
+        <li>Vaswani et al. — Attention (2017)</li>
+        <li>van den Oord — WaveNet (2016)</li>
+        <li>Rombach et al. — LDM (CVPR 2022)</li>
+        <li>Goodfellow — GAN (NeurIPS 2014)</li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Companies Cited</h5>
+      <ul>
+        <li><a href="https://firefly.adobe.com" target="_blank">Adobe Firefly</a></li>
+        <li><a href="https://elevenlabs.io" target="_blank">ElevenLabs</a></li>
+        <li><a href="https://runwayml.com" target="_blank">Runway ML</a></li>
+        <li><a href="https://openai.com/sora" target="_blank">OpenAI Sora</a></li>
+        <li><a href="https://research.netflix.com" target="_blank">Netflix Research</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>Mohammed · Advanced Deep Learning · 1447 AH — June 2026</span>
+    <span>Built with Claude Artifacts · Hosted on GitHub Pages</span>
+  </div>
+</footer>
+
+<script>
+// ── Case study accordion ──────────────────────────
+function toggleCase(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+}
+
+// ── Timeline filter ───────────────────────────────
+document.querySelectorAll('.tl-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tl-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const filter = btn.dataset.filter;
+    document.querySelectorAll('.tl-item').forEach(item => {
+      item.style.display =
+        (filter === 'all' || item.dataset.track === filter) ? '' : 'none';
+    });
+  });
+});
+
+// ── Smooth scroll ─────────────────────────────────
+document.querySelectorAll('a[href^="#"]').forEach(link => {
+  link.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(link.getAttribute('href'));
+    if (target) window.scrollTo({ top: target.offsetTop - 72, behavior: 'smooth' });
+  });
+});
+
+// ── Nav active state on scroll ────────────────────
+const sections = document.querySelectorAll('section[id], header[id]');
+const navLinks = document.querySelectorAll('.nav-links a');
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navLinks.forEach(link => {
+        link.style.color = link.getAttribute('href') === `#${entry.target.id}`
+          ? 'var(--text)' : '';
+      });
+    }
+  });
+}, { threshold: 0.4 });
+
+sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
